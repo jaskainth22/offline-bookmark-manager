@@ -520,6 +520,70 @@ class OfflineBookmarkReader {
         };
         localStorage.setItem('offline-bookmark-preferences', JSON.stringify(prefs));
     }
+
+    sanitizeAndDisplayContent(htmlContent) {
+        // Create a temporary container
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+        
+        // Remove any remaining problematic elements
+        const problematicSelectors = [
+            'script', 'style', 'link', 'meta', 'head',
+            '[style*="position: fixed"]',
+            '[style*="position: absolute"]',
+            '.gb_', '#gb', '[jscontroller]'
+        ];
+        
+        problematicSelectors.forEach(selector => {
+            tempDiv.querySelectorAll(selector).forEach(el => el.remove());
+        });
+        
+        // Apply reading-friendly structure
+        const readingContent = document.getElementById('reading-content');
+        readingContent.innerHTML = '';
+        
+        // Create a properly structured reading container
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'content-wrapper';
+        contentWrapper.innerHTML = tempDiv.innerHTML;
+        
+        readingContent.appendChild(contentWrapper);
+        
+        // Apply enhanced reading styles
+        this.applyReadingStyles();
+    }
+
+    applyReadingStyles() {
+        const readingContent = document.getElementById('reading-content');
+        
+        // Override any remaining problematic styles
+        const allElements = readingContent.querySelectorAll('*');
+        allElements.forEach(element => {
+            // Reset positioning
+            element.style.position = 'static';
+            element.style.float = 'none';
+            element.style.clear = 'both';
+            
+            // Reset layout
+            element.style.width = 'auto';
+            element.style.height = 'auto';
+            element.style.margin = '16px 0';
+            element.style.padding = '0';
+            
+            // Apply reading typography
+            if (element.tagName === 'P') {
+                element.style.lineHeight = '1.7';
+                element.style.marginBottom = '16px';
+            }
+            
+            if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(element.tagName)) {
+                element.style.marginTop = '24px';
+                element.style.marginBottom = '12px';
+                element.style.fontWeight = 'bold';
+            }
+        });
+    }
+
 }
 
 // Initialize reader when DOM is loaded

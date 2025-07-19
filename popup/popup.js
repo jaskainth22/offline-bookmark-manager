@@ -245,6 +245,67 @@ class OfflineBookmarkPopup {
         });
         window.close(); // Close popup
     }
+
+    async savePage() {
+        if (!this.currentTab || !this.currentTab.url) {
+            this.showStatus('No valid page to save', 'error');
+            return;
+        }
+
+        // Check for unsupported URLs
+        if (this.currentTab.url.startsWith('chrome://') ||
+            this.currentTab.url.startsWith('chrome-extension://') ||
+            this.currentTab.url.startsWith('moz-extension://')) {
+            this.showStatus('Cannot save browser internal pages', 'error');
+            return;
+        }
+
+        try {
+            // Show enhanced loading state
+            this.setSaveButtonState('loading');
+            this.showStatus('📥 Capturing page content and resources...', 'loading');
+
+            const response = await this.sendMessageWithTimeout({
+                action: 'savePage',
+                tab: {
+                    url: this.currentTab.url,
+                    title: this.currentTab.title,
+                    id: this.currentTab.id
+                }
+            }, 30000); // Increased timeout for enhanced capture
+
+            if (response.success) {
+                // Enhanced success message
+                let message = '✅ Page saved successfully!';
+                if (response.enhanced && response.resourceStats) {
+                    const stats = response.resourceStats;
+                    message += ` (${stats.images?.length || 0} images, ${this.formatBytes(stats.totalSize || 0)})`;
+                }
+                
+                this.showStatus(message, 'success');
+                await this.loadUIData();
+            } else {
+                throw new Error(response.error || 'Unknown error');
+            }
+
+        } catch (error) {
+            console.error('Error saving page:', error);
+            let errorMessage = this.getErrorMessage(error.message);
+            this.showStatus(errorMessage, 'error');
+        } finally {
+            this.setSaveButtonState('normal');
+        }
+    }
+
+    // Add helper method for formatting bytes
+    formatBytes(bytes) {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
 }
 
 // Initialize popup when DOM is loaded

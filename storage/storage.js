@@ -122,6 +122,76 @@ class OfflineBookmarkStorage {
     async setSetting(key, value) {
         await this.db.settings.put({ key, value });
     }
+
+    async savePage(pageData) {
+        try {
+            // Enhanced page object with resources
+            const page = {
+                url: pageData.url,
+                title: pageData.title || 'Untitled',
+                content: pageData.content || '',
+                savedAt: Date.now(),
+                tags: pageData.tags || [],
+                size: this.calculateSize(pageData.content),
+                favicon: pageData.favicon || '',
+                resources: pageData.resources || {}, // NEW: Store resources
+                captureType: pageData.captureType || 'basic', // NEW: Track capture type
+                resourceSize: this.calculateResourceSize(pageData.resources) // NEW: Resource size
+            };
+
+            // Check storage quota before saving (including resources)
+            const totalSize = page.size + page.resourceSize;
+            await this.checkStorageQuota(totalSize);
+
+            // Save to database
+            const id = await this.db.pages.add(page);
+            
+            console.log('💾 Page saved with enhanced data:', {
+                id,
+                contentSize: this.formatBytes(page.size),
+                resourceSize: this.formatBytes(page.resourceSize),
+                totalSize: this.formatBytes(totalSize),
+                captureType: page.captureType
+            });
+            
+            return { success: true, id, page };
+            
+        } catch (error) {
+            console.error('Error saving enhanced page:', error);
+            throw error;
+        }
+    }
+
+    // Add this helper method
+    calculateResourceSize(resources) {
+        if (!resources || typeof resources !== 'object') {
+            return 0;
+        }
+        
+        let totalSize = 0;
+        
+        // Calculate image sizes
+        if (resources.images && Array.isArray(resources.images)) {
+            totalSize += resources.images.reduce((sum, img) => sum + (img.size || 0), 0);
+        }
+        
+        // Calculate CSS sizes
+        if (resources.css && Array.isArray(resources.css)) {
+            totalSize += resources.css.reduce((sum, css) => sum + (css.size || 0), 0);
+        }
+        
+        return totalSize;
+    }
+
+    // Add this helper method
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
 }
 
 // Export for service worker context - REMOVE the window reference
