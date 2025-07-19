@@ -22,5 +22,10 @@
     "action": {
         "default_popup": "popup/popup.html",
         "default_title": "Offline Bookmark Manager"
-    }
+    },
+    
+    "web_accessible_resources": [{
+        "resources": ["reader/reader.html", "reader/reader.css", "reader/reader.js"],
+        "matches": ["<all_urls>"]
+    }]
 }

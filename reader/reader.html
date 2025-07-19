@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bookmarks - Saved Pages</title>
+    <link rel="stylesheet" href="reader.css">
+</head>
+<body>
+    <div class="reader-container">
+        <!-- Header -->
+        <header class="reader-header">
+            <div class="header-left">
+                <h1 class="reader-title">📚 Offline Bookmarks</h1>
+                <div class="stats-summary">
+                    <span id="total-count">0</span> pages saved
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search saved pages..." class="search-input">
+                    <button id="search-btn" class="search-btn">🔍</button>
+                </div>
+                <button id="refresh-btn" class="action-btn">↻</button>
+                <button id="settings-btn" class="action-btn">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="reader-nav">
+            <button id="list-view-btn" class="nav-btn active">📋 List View</button>
+            <button id="grid-view-btn" class="nav-btn">⊞ Grid View</button>
+            <button id="reading-view-btn" class="nav-btn hidden">📖 Reading</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="reader-main">
+            <!-- Page List View -->
+            <div id="list-view" class="view-container active">
+                <div class="list-header">
+                    <div class="sort-controls">
+                        <label>Sort by:</label>
+                        <select id="sort-select">
+                            <option value="savedAt-desc">Latest First</option>
+                            <option value="savedAt-asc">Oldest First</option>
+                            <option value="title-asc">Title A-Z</option>
+                            <option value="title-desc">Title Z-A</option>
+                            <option value="size-desc">Largest First</option>
+                        </select>
+                    </div>
+                    <div class="bulk-actions">
+                        <button id="select-all-btn" class="bulk-btn">Select All</button>
+                        <button id="delete-selected-btn" class="bulk-btn danger" disabled>Delete Selected</button>
+                    </div>
+                </div>
+                
+                <div id="pages-list" class="pages-list">
+                    <!-- Pages will be loaded here -->
+                    <div class="loading-message">Loading saved pages...</div>
+                </div>
+            </div>
+
+            <!-- Grid View -->
+            <div id="grid-view" class="view-container">
+                <div id="pages-grid" class="pages-grid">
+                    <!-- Grid items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Reading View -->
+            <div id="reading-view" class="view-container">
+                <div class="reading-header">
+                    <button id="back-to-list" class="back-btn">← Back to List</button>
+                    <div class="reading-controls">
+                        <button id="font-decrease" class="reading-btn">A-</button>
+                        <button id="font-increase" class="reading-btn">A+</button>
+                        <button id="dark-mode-toggle" class="reading-btn">🌙</button>
+                    </div>
+                </div>
+                <article id="reading-content" class="reading-content">
+                    <!-- Page content will be loaded here -->
+                </article>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="reader-footer">
+            <div class="storage-info">
+                <span>Storage: <span id="storage-used">0</span>MB / <span id="storage-quota">0</span>MB</span>
+                <div class="storage-bar">
+                    <div id="storage-progress" class="storage-progress"></div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Confirmation Modal -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="modal-title">Confirm Action</h3>
+                <p id="modal-message">Are you sure?</p>
+                <div class="modal-actions">
+                    <button id="modal-cancel" class="modal-btn">Cancel</button>
+                    <button id="modal-confirm" class="modal-btn danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../lib/dexie.min.js"></script>
+    <script src="../storage/storage.js"></script>
+    <script src="reader.js"></script>
+</body>
+</html>
